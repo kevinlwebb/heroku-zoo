@@ -1,0 +1,50 @@
+<html>
+
+
+
+  <body>
+    <h1>Add Animal</h1>
+    <form method="POST" action="/animals">
+      <input type="text" name="name">
+      <select name="typ">
+        <option value="Elephant">Elephant</option>
+        <option value="Monkey">Monkey</option>
+        <option value="Giraffe">Giraffe</option>
+      </select>
+      <input type="submit" value="Add">
+    </form>
+
+    <h1>Animals</h1>
+    <table>
+      {% for animal in animals %}
+        <tr>
+          <td>
+            {% if animal.typ == 'Elephant' %}
+              <img src="{{url_for('static', filename='ele.jpg')}}" height=90x width=90px/>
+            {% elif animal.typ == 'Monkey' %}
+              <img src="{{url_for('static', filename='mon.jpg')}}" height=70px width=70px/>
+            {% elif animal.typ == 'Giraffe' %}
+              <img src="{{url_for('static', filename='gir.jpg')}}" height=70px width=70px/>
+            {% endif %}
+          </td>
+          <td>
+            {{animal.name}}
+          </td>
+          <td>
+            <form method="POST" action="./updateanimal" style="display: inline">
+              <input type="hidden" value="{{animal.name}}" name="oldname">
+              <input type="text" value="{{animal.name}}" name="newname">
+              <input type="submit" value="Update">
+            </form>
+          </td>
+          <td>
+            <form method="POST" action="./deleteanimal" style="display: inline">
+              <input type="hidden" value="{{animal.name}}" name="name">
+              <input type="submit" value="Delete">
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
