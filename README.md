@@ -7,7 +7,7 @@ A barebones Flask app.
 Make sure you have Python 3.7 [installed locally](http://install.python-guide.org). To push to Heroku, you'll need to install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
 
 ```sh
-$ git clone https://github.com/kevinlwebb/heroku-python-flask-template.git
+$ git clone https://github.com/kevinlwebb/heroku-zoo.git
 $ cd heroku-python-flask-template
 
 $ python3 -m venv heroku-env
