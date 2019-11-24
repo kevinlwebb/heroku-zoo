@@ -2,7 +2,7 @@
   "name": "Start on Heroku: Python",
   "description": "A barebones Python Flask application",
   "repository": "https://github.com/kevinlwebb/heroku-python-test",
-  "logo": "https://cdn.rawgit.com/kevinlwebb/heroku-python-test/master/public/flask.svg",
+  "logo": "https://rawcdn.githack.com/kevinlwebb/heroku-python-test/0da2246c9a9283205414877accae5154ffee0487/public/flask.svg",
   "keywords": ["python", "flask" ],
   "image": "heroku/python"
 }
