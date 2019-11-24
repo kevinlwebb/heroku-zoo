@@ -1,0 +1,8 @@
+{
+  "name": "Start on Heroku: Python",
+  "description": "A barebones Python Flask application",
+  "repository": "https://github.com/kevinlwebb/heroku-python-test",
+  "logo": "https://cdn.rawgit.com/kevinlwebb/heroku-python-test/master/public/node.svg",
+  "keywords": ["python", "flask" ],
+  "image": "heroku/python"
+}
