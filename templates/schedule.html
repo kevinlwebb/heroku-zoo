@@ -151,6 +151,7 @@
                 {% if current_user.tier == 'Admin' %}
                 <div>
                     <button class="button-big"><a href="{{ url_for('addschedule') }}">Register Time</a></button>
+                    <button class="button-big"><a href="{{ url_for('createdailyschedule') }}">Create Daily Schedule</a></button>
                 </div>
                 {% endif %}
 

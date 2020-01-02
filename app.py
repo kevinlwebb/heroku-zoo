@@ -5,6 +5,7 @@ import time
 import socket
 import os
 import logging
+import random
 
 from datetime import datetime, timedelta,date
 
@@ -17,9 +18,9 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, Selec
 from wtforms.fields.html5 import DateTimeLocalField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Required
 
-from werkzeug import secure_filename
 from werkzeug.urls import url_parse
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -43,6 +44,7 @@ app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+# Global Variables
 
 feeders = {1:{
 	"schedule":[],
@@ -60,6 +62,8 @@ feeders = {1:{
 	"activation":"Deactivated"
 }
 }
+
+last_daily_schedule_creation = datetime(1, 1, 1, 0, 0, 0)
 
 #####
 
@@ -196,15 +200,18 @@ def create_tables():
         session.commit()
         print('[FINISHED TABLE]')
 
+
 @app.teardown_request
 def remove_session(ex=None):
     session.remove()
+
 
 @app.route('/index')
 @login_required
 def index():
 	completed,notifications = getcompletedschedule()
 	return render_template('dashboard.html', title='Home',feeder=feeders,complete=completed,notifications=notifications)
+
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
@@ -247,6 +254,7 @@ def register():
         return redirect(url_for('users'))
     return render_template('register2.html', title='Register', form=form)
 
+
 @app.route('/users')
 @login_required
 def users():
@@ -255,6 +263,7 @@ def users():
     db.session.commit()
     completed,notifications = getcompletedschedule()
     return render_template("users.html", users=users,complete=completed,notifications=notifications)
+
 
 @app.route('/log')
 @login_required
@@ -266,11 +275,13 @@ def log():
     completed,notifications = getcompletedschedule()
     return render_template("log.html", events=events,complete=completed,notifications=notifications)
 
+
 @app.route('/schedule')
 @login_required
 def schedule():
 	completed,notifications = getcompletedschedule()
 	return render_template("schedule.html", feeder = feeders,complete=completed,notifications=notifications)
+
 
 @app.route('/addschedule', methods=['GET', 'POST'])
 @login_required
@@ -316,6 +327,7 @@ def delete():
     logger.info('%s deleted user: %s', current_user.username, username)
     return redirect(url_for('users'))
 
+
 @app.route('/animals', methods=["GET", "POST"])
 @login_required
 def animals():
@@ -337,6 +349,7 @@ def animals():
     completed,notifications = getcompletedschedule()
     return render_template("animals.html", animals=animals,complete=completed,notifications=notifications)
 
+
 @app.route("/updateanimal", methods=["POST"])
 @login_required
 def updateanimal():
@@ -350,8 +363,8 @@ def updateanimal():
         print("Couldn't update animal name")
         print(e)
     return redirect("/animals")
-  
-  
+
+
 @app.route("/deleteanimal", methods=["POST"])
 @login_required
 def deleteanimal():
@@ -361,6 +374,7 @@ def deleteanimal():
     session.commit()
     logger.info('%s deleted animal: %s', current_user.username, name)
     return redirect("/animals")
+
 
 @app.route('/addanimal', methods=['GET', 'POST'])
 @login_required
@@ -375,6 +389,7 @@ def addanimal():
         return redirect(url_for('animals'))
     return render_template('addanimal.html', title='Register', form=form)
 
+
 @app.route("/addtime/<feeder_id>", methods=["POST"])
 @login_required
 def addtime(feeder_id):
@@ -385,6 +400,7 @@ def addtime(feeder_id):
     sendSchedule(bytes(feeders[feeder_id]["schedule"][-1].strftime("%m/%d/%Y, %H:%M:%S").encode()))
 
     return str(datetime.now() + timedelta(minutes=1))
+
 
 @app.route("/deletetime", methods=["POST"])
 @login_required
@@ -401,11 +417,43 @@ def deletetime():
     logger.info('%s deleted time, %s, on Feeder %s', current_user.username, time, feeder_id)
     return redirect("/schedule")
 
-@app.route("/getschedule", methods=["GET"])
+
+@app.route("/createdailyschedule")
 @login_required
+def createdailyschedule():
+    global last_daily_schedule_creation
+    if datetime.now().date() > last_daily_schedule_creation.date():
+        global feeders
+        feeds = random.randint(3,8)
+
+        feeding_time_ranges = [(5,7),(10,13),(15,16),(18,24)]
+
+        bins = pidgeon_hole(feeds, len(feeding_time_ranges))
+
+        for feeding_time_range, b in zip(feeding_time_ranges, bins):
+            start, end = feeding_time_range
+            today = date.today()
+            start_time = datetime(today.year, today.month, today.day, start, 0, 0)
+            if end == 24:
+                end_time = today + timedelta(days=1)
+                end_time = datetime(end_time.year, end_time.month, end_time.day, 0, 0, 0)
+            else:
+                end_time = datetime(today.year, today.month, today.day, end, 0, 0)
+            for time in randomtimes(start_time, end_time, b):
+                feeders[random.randint(1,3)]["schedule"].append(time)
+        
+        last_daily_schedule_creation = datetime.now()
+
+        logger.info('%s initiated daily schedule creation', current_user.username)
+        
+    return redirect("/schedule")
+
+
+@app.route("/getschedule", methods=["GET"])
 def getschedule():
 	global feeders
 	return json.dumps(feeders,default=json_serial)
+
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -413,6 +461,7 @@ def json_serial(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
+
 
 def getcompletedschedule():
 	global feeders
@@ -426,6 +475,7 @@ def getcompletedschedule():
 				out[key].append(date)
 	return out,notifications
 
+
 def sendSchedule(message):
     s = socket.socket()
 
@@ -433,19 +483,33 @@ def sendSchedule(message):
     port = 12345
 
     try:
+        print("Not Implemented")
         # connect to the server on local computer 
-        s.connect(('192.168.2.2', port))
-        #s.connect(('192.168.1.102', port))
-        #s.connect(('127.0.0.1', port))
+        #s.connect(('ip address', port))
 
         # send a thank you message to the client.  
-        s.send(message)
+        #s.send(message)
 
         # close the connection 
-        s.close()
+        #s.close()
     except Exception as e:
         print("Couldn't send time")
         print(e)
+
+
+def randomtimes(stime, etime, n):
+    td = etime - stime
+    return [random.random() * td + stime for _ in range(n)]
+
+
+def pidgeon_hole(n, n_bins): 
+    quotient = n // n_bins
+    remainder = n % n_bins
+
+    bins = [quotient for i in range(n_bins)]    
+    for i in range(remainder):
+        bins[i] += 1
+    return bins
 
 
 if __name__ == "__main__": 
