@@ -6,3 +6,8 @@ INFO:2020-01-01 21:04:22,250:admin initiated daily schedule creation
 INFO:2020-01-01 21:06:03,373:admin initiated daily schedule creation
 INFO:2020-01-01 21:09:12,029:admin initiated daily schedule creation
 INFO:2020-01-01 21:17:13,616:admin initiated daily schedule creation
+INFO:2020-01-12 11:51:56,350:admin registered new user: ketuoo
+INFO:2020-01-12 16:58:15,169:admin registered new user: tutu
+INFO:2020-01-12 17:18:02,675:admin initiated daily schedule creation
+INFO:2020-01-12 21:00:24,067:admin deleted time, 2020-01-15 01:00:00, on Feeder 1
+INFO:2020-01-12 21:17:56,914:admin initiated daily schedule creation
