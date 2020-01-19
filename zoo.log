@@ -11,3 +11,47 @@ INFO:2020-01-12 16:58:15,169:admin registered new user: tutu
 INFO:2020-01-12 17:18:02,675:admin initiated daily schedule creation
 INFO:2020-01-12 21:00:24,067:admin deleted time, 2020-01-15 01:00:00, on Feeder 1
 INFO:2020-01-12 21:17:56,914:admin initiated daily schedule creation
+INFO:2020-01-16 22:13:09,351:admin deleted time, 0001-01-02 00:00:00, on Feeder 1
+INFO:2020-01-16 22:13:09,933:admin deleted time, 2020-01-16 01:00:00, on Feeder 1
+INFO:2020-01-16 22:13:10,303:admin deleted time, 2020-01-12 05:21:46.569739, on Feeder 1
+INFO:2020-01-16 22:13:10,619:admin deleted time, 2020-01-12 05:46:36.636767, on Feeder 1
+INFO:2020-01-16 22:13:10,889:admin deleted time, 2020-01-12 12:39:54.703970, on Feeder 1
+INFO:2020-01-16 22:13:11,151:admin deleted time, 2020-01-12 10:20:50.498906, on Feeder 1
+INFO:2020-01-16 22:13:11,368:admin deleted time, 2020-01-12 15:21:43.739959, on Feeder 1
+INFO:2020-01-16 22:13:11,737:admin deleted time, 2020-01-12 15:37:24.804702, on Feeder 1
+INFO:2020-01-16 22:13:12,326:admin deleted time, 2020-01-12 18:43:05.322170, on Feeder 1
+INFO:2020-01-18 12:35:16,820:admin initiated daily schedule creation
+INFO:2020-01-18 13:21:06,697:admin added feeder.
+INFO:2020-01-18 13:40:07,077:admin deleted Feeder 2
+INFO:2020-01-18 13:40:08,932:admin added feeder.
+INFO:2020-01-18 13:40:11,714:admin deleted Feeder 2
+INFO:2020-01-18 13:46:09,262:admin deleted Feeder 3
+INFO:2020-01-18 13:46:10,713:admin deleted Feeder 2
+INFO:2020-01-18 13:46:12,239:admin initiated daily schedule creation
+INFO:2020-01-18 13:46:16,855:admin added feeder.
+INFO:2020-01-18 13:47:35,749:admin deleted Feeder 2
+INFO:2020-01-18 13:47:37,687:admin added feeder.
+INFO:2020-01-18 13:54:57,192:admin deleted Feeder 3
+INFO:2020-01-18 13:54:58,429:admin initiated daily schedule creation
+INFO:2020-01-18 13:55:01,063:admin deleted time, 2020-01-18 15:50:37.329530, on Feeder 2
+INFO:2020-01-18 13:55:02,303:admin deleted time, 2020-01-18 12:17:02.477555, on Feeder 2
+INFO:2020-01-18 13:55:02,992:admin deleted time, 2020-01-18 05:07:36.973412, on Feeder 2
+INFO:2020-01-18 13:55:14,737:admin deleted time, 2020-01-18 21:15:57.615435, on Feeder 1
+INFO:2020-01-18 13:55:15,604:admin deleted Feeder 2
+INFO:2020-01-18 13:55:20,749:admin initiated daily schedule creation
+INFO:2020-01-18 13:55:24,440:admin deleted Feeder 1
+INFO:2020-01-18 13:55:34,876:admin added feeder.
+INFO:2020-01-18 13:55:35,438:admin added feeder.
+INFO:2020-01-18 13:55:36,014:admin added feeder.
+INFO:2020-01-18 13:55:44,406:admin initiated daily schedule creation
+INFO:2020-01-18 13:55:48,181:admin deleted Feeder 3
+INFO:2020-01-18 14:09:07,942:admin deleted Feeder 2
+INFO:2020-01-18 14:09:09,289:admin added feeder.
+INFO:2020-01-18 14:09:10,291:admin added feeder.
+INFO:2020-01-18 18:15:15,435:admin added feeder.
+INFO:2020-01-18 18:15:16,842:admin deleted Feeder 4
+INFO:2020-01-18 18:31:10,972:admin registered new user: Miki
+INFO:2020-01-18 18:31:19,371:admin deleted animal: Tiki
+INFO:2020-01-18 18:42:24,346:admin deleted time, 2020-01-18 06:14:34.333141, on Feeder 1
+INFO:2020-01-18 18:42:25,102:admin deleted time, 2020-01-18 06:15:01.294566, on Feeder 1
+INFO:2020-01-18 18:42:30,924:admin initiated daily schedule creation

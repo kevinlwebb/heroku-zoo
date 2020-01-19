@@ -23,24 +23,6 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 
-feeders = {1:{
-	"schedule":[],
-	"wifi":"connected",
-	"activation":"Activated"
-},
-2:{
-	"schedule":[],
-	"wifi":"connected",
-	"activation":"Activated"
-},
-3:{
-	"schedule":[],
-	"wifi":"not connected",
-	"activation":"Deactivated"
-}
-}
-
-
 last_daily_schedule_creation = datetime(1, 1, 1, 0, 0, 0)
 
 
@@ -87,7 +69,8 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        completed,notifications = getcompletedschedule()
+        return render_template('dashboard.html', title='Home',feeder=Feeder.as_dict(),complete=completed,notifications=notifications)
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -98,6 +81,8 @@ def login():
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
+            completed,notifications = getcompletedschedule()
+            return render_template('dashboard.html', title='Home',feeder=Feeder.as_dict(),complete=completed,notifications=notifications)
         return redirect(next_page)
     return render_template('login2.html', title='Sign In', form=form)
 
@@ -146,13 +131,6 @@ def log():
     return render_template("log.html", events=events,complete=completed,notifications=notifications)
 
 
-@app.route('/schedule')
-@login_required
-def schedule():
-	completed,notifications = getcompletedschedule()
-	return render_template("schedule.html", feeder = Feeder.as_dict(),complete=completed,notifications=notifications)
-
-
 @app.route('/addschedule', methods=['GET', 'POST'])
 @login_required
 def addschedule():
@@ -164,19 +142,13 @@ def addschedule():
         print(feeder_num)
         datetime_object = datetime.strptime(in_date, '%Y-%m-%d %H:%M')
         for f in feeder_num:
-            #feeders[int(f)]["schedule"].append(datetime_object)
-            
             feeder = Feeder.query.filter_by(number=int(f)).first()
             date = Date(date=datetime_object,feeder=feeder)
             db.session.add(date)
             db.session.commit()
-
         return redirect(url_for('schedule'))
-
     if form.validate_on_submit():
-        
         print(form.date.data)
-
         return redirect(url_for('schedule'))
     return render_template('addtime.html', title='Register', form=form)
 
@@ -256,41 +228,22 @@ def addanimal():
         return redirect(url_for('animals'))
     return render_template('addanimal.html', title='Register', form=form)
 
-# Get rid of
-@app.route("/addtime/<feeder_id>", methods=["POST"])
-@login_required
-def addtime(feeder_id):
-
-    feeder_id = int(feeder_id)
-    global feeders
-    feeders[feeder_id]["schedule"].append(datetime.now() + timedelta(minutes=1))
-
-    sendSchedule(bytes(feeders[feeder_id]["schedule"][-1].strftime("%m/%d/%Y, %H:%M:%S").encode()))
-
-    return str(datetime.now() + timedelta(minutes=1))
-
 
 @app.route("/deletetime", methods=["POST"])
 @login_required
 def deletetime():
     feeder_id = int(request.form.get("feeder_id"))
     time = request.form.get("time")
-    global feeders
     if "." in time:
-        #index = feeders[feeder_id]["schedule"].index(datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f"))
         time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f")
     else:
-        #index = feeders[feeder_id]["schedule"].index(datetime.strptime(time, "%Y-%m-%d %H:%M:%S"))
         time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S")
-    #print(index)
-    #del feeders[feeder_id]["schedule"][index]
-
     date = Date.query.filter_by(feeder_id=feeder_id,date=time).first()
     db.session.delete(date)
     db.session.commit()
 
     logger.info('%s deleted time, %s, on Feeder %s', current_user.username, time, feeder_id)
-    return redirect("/schedule")
+    return redirect("/")
 
 
 @app.route("/createdailyschedule")
@@ -298,13 +251,9 @@ def deletetime():
 def createdailyschedule():
     global last_daily_schedule_creation
     if datetime.now().date() > last_daily_schedule_creation.date():
-        global feeders
         feeds = random.randint(3,8)
-
         feeding_time_ranges = [(5,7),(10,13),(15,16),(18,24)]
-
         bins = pidgeon_hole(feeds, len(feeding_time_ranges))
-
         for feeding_time_range, b in zip(feeding_time_ranges, bins):
             start, end = feeding_time_range
             today = date.today()
@@ -315,38 +264,57 @@ def createdailyschedule():
             else:
                 end_time = datetime(today.year, today.month, today.day, end, 0, 0)
             for time in randomtimes(start_time, end_time, b):
-                #feeders[random.randint(1,3)]["schedule"].append(time)
-
                 num_feeders = len(Feeder.query.all())
                 feeder = Feeder.query.filter_by(number=random.randint(1,num_feeders)).first()
                 date1 = Date(date=time,feeder=feeder)
                 db.session.add(date1)
                 db.session.commit()
-        
         last_daily_schedule_creation = datetime.now()
-
         logger.info('%s initiated daily schedule creation', current_user.username)
         
-    return redirect("/schedule")
+    return redirect("/")
 
 
 @app.route("/getschedule", methods=["GET"])
 def getschedule():
-	#global feeders
     feeders = Feeder.as_dict()
     return json.dumps(feeders,default=json_serial)
 
 
+@app.route("/addfeeder")
+@login_required
+def addfeeder():
+    feeder = Feeder(number=len(Feeder.query.all())+1,wifi="Connected",activation="Activated")
+    db.session.add(feeder)
+    db.session.commit()
+    logger.info('%s added feeder.', current_user.username)
+    return redirect("/")
+
+
+@app.route("/deletefeeder", methods=["POST"])
+@login_required
+def deletefeeder():
+    feeder_id = int(request.form.get("feeder_id"))
+    feeder = Feeder.query.filter_by(number=feeder_id).first()
+    db.session.delete(feeder)
+    db.session.commit()
+
+    logger.info('%s deleted Feeder %s', current_user.username, feeder_id)
+    return redirect("/")
+
+@app.route("/test")
+def test():
+    return render_template('testjinja.html')
+
+
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
-
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
 
 
 def getcompletedschedule():
-	#global feeders
     feeders = Feeder.as_dict()
     out = {}
     notifications = 0

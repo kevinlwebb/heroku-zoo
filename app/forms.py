@@ -2,7 +2,7 @@ from app.tables import Animal, User
 
 from flask_wtf import FlaskForm
 
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, RadioField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, RadioField, IntegerField
 from wtforms.fields.html5 import DateTimeLocalField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Required
 
@@ -46,7 +46,8 @@ class AnimalForm(FlaskForm):
 
 
 class TimeForm(FlaskForm):
-    #time = StringField('Animal Name', validators=[DataRequired()])
     date = DateTimeLocalField('Select date and time next scheduled feed', format='%m/%d/%y')
-    #feeder = SelectField(u'Animal Type', choices=[('Elephant', 'Elephant'), ('Monkey', 'Monkey'), ('Giraffe', 'Giraffe')])
     submit = SubmitField('Add')
+
+class FeederForm(FlaskForm):
+    pass

@@ -25,6 +25,7 @@ class User(UserMixin, db.Model):
 class Animal(db.Model):
     name = db.Column(db.String(80), unique=True, nullable=False, primary_key=True)
     typ = db.Column(db.String(150))
+    intake = db.Column(db.Float, default=2)
 
     def __repr__(self):
         return "<Animal: {}>".format(self.name)
@@ -34,6 +35,8 @@ class Feeder(db.Model):
     number = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     wifi = db.Column(db.String(150))
     activation = db.Column(db.String(150))
+    # The relationship is established here as well to allow deletion of one feeder and all of its dates.
+    date = db.relationship("Date", back_populates='feeder',cascade="all, delete, delete-orphan")
 
     def __repr__(self):
         return '<Feeder %r>' % self.number
@@ -51,7 +54,7 @@ class Feeder(db.Model):
 class Date(db.Model):
     date = db.Column(db.DateTime, nullable=False, primary_key=True)
     feeder_id = db.Column(db.Integer, db.ForeignKey('feeder.number'),nullable=False)
-    feeder = db.relationship('Feeder', backref=db.backref('dates', lazy=True))
+    feeder = db.relationship('Feeder', backref=db.backref('dates', lazy=True),single_parent=True)
 
     def __repr__(self):
         return '<Date %r>' % self.date

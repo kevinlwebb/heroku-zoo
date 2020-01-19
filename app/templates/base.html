@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        {% block head %}
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-clearmin.min.css') }}">
@@ -8,43 +9,28 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/material-design.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/small-n-flat.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/solid.css" integrity="sha384-QokYePQSOwpBDuhlHOsX0ymF6R/vLk/UQVz3WHa6wygxI5oGTmDTv8wahFOSspdm" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/fontawesome.css" integrity="sha384-vd1e11sR28tEK9YANUtpIOdjGW14pS87bUBuOIoBILVWLFnS+MCX9T6MMf0VdPGq" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/c3.min.css') }}">
-        <title>Schedule</title>
-        <style type="text/css">
+        <style type="text/css">{% block css %}{% endblock %}</style>
 
-            .button-big {
-              background-color: #fff; /* Green */
-              border: 1px solid #ddd; /* Green */
-              color: white;
-              padding: 15px 32px;
-              text-align: center;
-              text-decoration: none;
-              display: inline-block;
-              font-size: 16px;
-              -webkit-transition-duration: 0.4s; /* Safari */
-              transition-duration: 0.4s;
-            }
-            .button-big:hover {
-              background-color: #f7f7f7; /* Green */
-              color: white;
-            }
-        </style>
+        <title>{% block title %}{% endblock %}</title>
+        {% endblock %}
     </head>
     <body class="cm-no-transition cm-2-navbar">
         <div id="cm-menu">
             <nav class="cm-navbar cm-navbar-primary">
-                <div class="cm-flex"><a href="index.html" class="cm-logo"></a></div>
+                <div class="cm-flex"><a href="{{ url_for('index') }}" class="cm-logo"></a></div>
                 <div class="btn btn-primary md-menu-white" data-toggle="cm-menu"></div>
             </nav>
             <div id="cm-menu-content">
                 <div id="cm-menu-items-wrapper">
                     <div id="cm-menu-scroller">
                         <ul class="cm-menu-items">
-                            <li><a href="{{ url_for('index') }}" class="sf-dashboard">Dashboard</a></li>
-                            <li><a href="{{ url_for('users') }}" class="sf-profile-group">Users</a></li>
-                            <li><a href="{{ url_for('log') }}" class="sf-file-text">Log</a></li>
-                            <li><a href="{{ url_for('animals') }}" class="sf-cat">Animals</a></li>
-                            <li class="active"><a href="{{ url_for('schedule') }}" class="sf-calendar-clock">Schedule</a></li>
+                            <li {% block dashactive %}{% endblock %}><a href="{{ url_for('index') }}" class="sf-dashboard">Dashboard</a></li>
+                            <li {% block useractive %}{% endblock %}><a href="{{ url_for('users') }}" class="sf-profile-group">Users</a></li>
+                            <li {% block logactive %}{% endblock %}><a href="{{ url_for('log') }}" class="sf-file-text">Log</a></li>
+                            <li {% block animalactive %}{% endblock %}><a href="{{ url_for('animals') }}" class="sf-cat">Animals</a></li>
                         </ul>
                     </div>
                 </div>
@@ -54,7 +40,7 @@
             <nav class="cm-navbar cm-navbar-primary">
                 <div class="btn btn-primary md-menu-white hidden-md hidden-lg" data-toggle="cm-menu"></div>
                 <div class="cm-flex">
-                    <h1>Schedule</h1> 
+                    <h1>{% block titlebard %}{% endblock %}</h1> 
                     <form id="cm-search" action="index.html" method="get">
                         <input type="search" name="q" autocomplete="off" placeholder="Search...">
                     </form>
@@ -109,51 +95,7 @@
         <div id="global">
             <div class="container-fluid">
 
-                <div class="panel panel-default">
-                        <table class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Feeder</th>
-                                    <th>Time</th>
-                                    <th>Edit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for i in range(feeder|length): %}
-
-                                    {% for time in feeder[i+1].schedule: %}
-
-                                    <tr>
-                                        <td>
-                                            Feeder {{i+1}}
-                                        </td>
-                                        <td>
-                                            {{time}}
-                                        </td>
-                                        <td>
-                                            <form method="POST" action="./deletetime" style="display: inline">
-                                              <input type="hidden" value="{{i+1}}" name="feeder_id">
-                                              <input type="hidden" value="{{time}}" name="time">
-                                              <input type="submit" value="Delete">
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                {% endfor %}
-
-                            </tbody>
-                        </table>
-
-                </div>
-
-
-
-                {% if current_user.tier == 'Admin' %}
-                <div>
-                    <button class="button-big"><a href="{{ url_for('addschedule') }}">Register Time</a></button>
-                    <button class="button-big"><a href="{{ url_for('createdailyschedule') }}">Create Daily Schedule</a></button>
-                </div>
-                {% endif %}
+                {% block content %}{% endblock %}
 
             </div>
             <footer class="cm-footer"><span class="pull-left">Connected as {{ current_user.username }}</span><span class="pull-right">&copy; KEVIN WEBB</span></footer>
@@ -166,7 +108,6 @@
         <script src="{{ url_for('static', filename='js/clearmin.min.js') }}"></script>
         <script src="{{ url_for('static', filename='js/lib/d3.min.js') }}"></script>
         <script src="{{ url_for('static', filename='js/lib/c3.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/demo/dashboard.js') }}"></script>
         <script>
         function reloadNotifications(){
             $("#notif").load(location.href + " #notif");
