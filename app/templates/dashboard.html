@@ -47,6 +47,7 @@
                 <div class="row">
                     <div class="col-xs-12">
                             <div class="row">
+                                {% if feeder|length > 0 %}
                                 {% for i in range(feeder|length): %}
                                     <div class="col-xs-6">
                                         <div class="panel panel-default">
@@ -70,6 +71,7 @@
                                         </div>
                                     </div>
                                 {% endfor %}
+                                {% endif %}
                         </div>
                     </div>
                 </div>
