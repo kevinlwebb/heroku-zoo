@@ -11,6 +11,8 @@ import random
 import json
 import socket
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 
 # Logger
 #logger = logging.basicConfig(filename='zoo.log', format='%(levelname)s:%(asctime)s:%(message)s', level=logging.DEBUG)
@@ -146,10 +148,10 @@ def addschedule():
             date = Date(date=datetime_object,feeder=feeder)
             db.session.add(date)
             db.session.commit()
-        return redirect(url_for('schedule'))
+        return redirect("/")
     if form.validate_on_submit():
         print(form.date.data)
-        return redirect(url_for('schedule'))
+        return redirect("/")
     return render_template('addtime.html', title='Register', form=form)
 
 
@@ -249,28 +251,34 @@ def deletetime():
 @app.route("/createdailyschedule")
 @login_required
 def createdailyschedule():
-    global last_daily_schedule_creation
-    if datetime.now().date() > last_daily_schedule_creation.date():
-        feeds = random.randint(3,8)
-        feeding_time_ranges = [(5,7),(10,13),(15,16),(18,24)]
-        bins = pidgeon_hole(feeds, len(feeding_time_ranges))
-        for feeding_time_range, b in zip(feeding_time_ranges, bins):
-            start, end = feeding_time_range
-            today = date.today()
-            start_time = datetime(today.year, today.month, today.day, start, 0, 0)
-            if end == 24:
-                end_time = today + timedelta(days=1)
-                end_time = datetime(end_time.year, end_time.month, end_time.day, 0, 0, 0)
-            else:
-                end_time = datetime(today.year, today.month, today.day, end, 0, 0)
-            for time in randomtimes(start_time, end_time, b):
-                num_feeders = len(Feeder.query.all())
-                feeder = Feeder.query.filter_by(number=random.randint(1,num_feeders)).first()
-                date1 = Date(date=time,feeder=feeder)
-                db.session.add(date1)
-                db.session.commit()
-        last_daily_schedule_creation = datetime.now()
-        logger.info('%s initiated daily schedule creation', current_user.username)
+
+    num_feeders = len(Feeder.query.all())
+    for x in range(num_feeders):
+        dates = Date.query.filter_by(feeder_id=x+1).all()
+        for d in dates:
+            db.session.delete(d)
+            db.session.commit()
+
+    feeds = random.randint(3,8)
+    feeding_time_ranges = [(5,7),(10,13),(15,16),(18,24)]
+    bins = pidgeon_hole(feeds, len(feeding_time_ranges))
+    for feeding_time_range, b in zip(feeding_time_ranges, bins):
+        start, end = feeding_time_range
+        today = date.today()
+        start_time = datetime(today.year, today.month, today.day, start, 0, 0)
+        if end == 24:
+            end_time = today + timedelta(days=1)
+            end_time = datetime(end_time.year, end_time.month, end_time.day, 0, 0, 0)
+        else:
+            end_time = datetime(today.year, today.month, today.day, end, 0, 0)
+        for time in randomtimes(start_time, end_time, b):
+            num_feeders = len(Feeder.query.all())
+            feeder = Feeder.query.filter_by(number=random.randint(1,num_feeders)).first()
+            date1 = Date(date=time,feeder=feeder)
+            db.session.add(date1)
+            db.session.commit()
+
+    logger.info('%s initiated daily schedule creation', current_user.username)
         
     return redirect("/")
 
@@ -304,7 +312,8 @@ def deletefeeder():
 
 @app.route("/test")
 def test():
-    return render_template('testjinja.html')
+    #return render_template('testjinja.html')
+    return "hi"
 
 
 def json_serial(obj):
@@ -361,3 +370,36 @@ def pidgeon_hole(n, n_bins):
     for i in range(remainder):
         bins[i] += 1
     return bins
+
+def daily_scheduler():
+
+    num_feeders = len(Feeder.query.all())
+    for x in range(num_feeders):
+        dates = Date.query.filter_by(feeder_id=x+1).all()
+        for d in dates:
+            db.session.delete(d)
+            db.session.commit()
+
+    feeds = random.randint(3,8)
+    feeding_time_ranges = [(5,7),(10,13),(15,16),(18,24)]
+    bins = pidgeon_hole(feeds, len(feeding_time_ranges))
+    for feeding_time_range, b in zip(feeding_time_ranges, bins):
+        start, end = feeding_time_range
+        today = date.today()
+        start_time = datetime(today.year, today.month, today.day, start, 0, 0)
+        if end == 24:
+            end_time = today + timedelta(days=1)
+            end_time = datetime(end_time.year, end_time.month, end_time.day, 0, 0, 0)
+        else:
+            end_time = datetime(today.year, today.month, today.day, end, 0, 0)
+        for time in randomtimes(start_time, end_time, b):
+            num_feeders = len(Feeder.query.all())
+            feeder = Feeder.query.filter_by(number=random.randint(1,num_feeders)).first()
+            date1 = Date(date=time,feeder=feeder)
+            db.session.add(date1)
+            db.session.commit()
+
+scheduler = BackgroundScheduler(timezone="America/Chicago")
+#job = scheduler.add_job(daily_scheduler, 'interval', minutes=1)
+job = scheduler.add_job(daily_scheduler, trigger='cron', hour='00', minute='01')
+scheduler.start()
